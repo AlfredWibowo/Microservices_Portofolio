@@ -13,47 +13,39 @@ class DatabaseWrapper:
         self.connection = connection
 
     def register(self, username, password):
-        cursor = self.connection.cursor(dictionary=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
         #check username already used or not
         sql = "SELECT * FROM user WHERE username = %s"
         cursor.execute(sql, (username,))
         
-        if (cursor.rowcount == 0):
+        if (cursor.rowcount > 0):
+            cursor.close()
+            return None
+        else:
             #insert to db
             sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
             cursor.execute(sql, (username, password,))
             self.connection.commit()
-            
-            sql = "SELECT * FROM user WHERE username = %s AND password %s"
-            cursor.execute(sql, (username, password))
 
-            if (cursor.rowcount > 0):
-                row = cursor.fetchone()
-                result.append({
-                    'username': row['username'],
-                    'password': row['password'],
-                })
+            sql = "SELECT * FROM user WHERE username = %s AND password = %s"
+            cursor.execute(sql, (username, password,))
+
+            result = cursor.fetchone()
             
             cursor.close()
-            return result
-        else:
-            return None
+            return result 
 
     def login(self, username, password):
-        cursor = self.connection.cursor(dictionary=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []     
         #checking username and password exsist 
         sql = "SELECT * FROM user WHERE username = %s AND password = %s"
         cursor.execute(sql, (username, password,))
 
         if (cursor.rowcount > 0):
-            row = cursor.fetchone()
-            result.append({
-                'username': row['username'],
-                'password': row['password'],
-            })
+            result = cursor.fetchone()
 
             cursor.close()
             return result
@@ -61,9 +53,11 @@ class DatabaseWrapper:
             return None
 
     def get_all_news(self):
-        cursor = self.connection.cursor(dictionary=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = "SELECT * FROM news"
+
+        #asumsi achive = tidak dapat dilihat lg tp msh ada datanya
+        sql = "SELECT * FROM news WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
         cursor.execute(sql)
 
         if (cursor.rowcount > 0):
@@ -71,38 +65,35 @@ class DatabaseWrapper:
                 result.append({
                     'id': row['id'],
                     'timestamp': row['timestamp'],
-                    'desc': row['desc'],
+                    'description': row['description'],
                 }) 
                 
-                cursor.close()
-                return result
+            cursor.close()
+            return result
         else:
             return None
 
     def get_news_by_id(self, news_id):
-        cursor = self.connection.cursor(dictionary=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = "SELECT * FROM news WHERE id = %s"
+
+        #asumsi achive = tidak dapat dilihat lg tp msh ada datanya
+        sql = "SELECT * FROM news WHERE id = %s AND timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
         cursor.execute(sql, (news_id,))
 
         if (cursor.rowcount > 0):
-            row = cursor.fetchone()
-            result.append({
-                'id': row['id'],
-                'timestamp': row['timestamp'],
-                'desc': row['desc'],
-            })
+            result = cursor.fetchone()
 
             cursor.close()
             return result
         else:
             return None
 
-    def add_news(self, desc):
-        cursor = self.connection.cursor(dictionary=True)
+    def add_news(self, description):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = "INSERT INTO news (date, desc) VALUES (CURRENT_DATE, %s)"
-        cursor.execute(sql, (desc,))
+        sql = "INSERT INTO news (timestamp, description) VALUES (CURRENT_DATE, %s)"
+        cursor.execute(sql, (description,))
         self.connection.commit()
 
         #check add
@@ -110,23 +101,22 @@ class DatabaseWrapper:
         cursor.execute(sql)
         
         if (cursor.rowcount > 0):
-            lastrow = cursor.fetchone()
-            result.append({
-                'id': lastrow['id'],
-                'timestamp': lastrow['timestamp'],
-                'desc': lastrow['desc'],
-            })
+            result = cursor.fetchone()
             
             cursor.close()
             return result
         else:
-            return None
+            return False
 
-    def edit_news(self, news_id, desc):
-        cursor = self.connection.cursor(dictionary=True)
+    def edit_news(self, news_id, description):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = "UPDATE news (date, description) VALUES (CURRENT_DATE, %s) WHERE id = %s"
-        cursor.execute(sql, (desc, news_id))
+        sql = """
+            UPDATE news
+            SET timestamp = CURRENT_DATE, description = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql, (description, news_id))
         self.connection.commit()
         
         #check edit
@@ -134,12 +124,7 @@ class DatabaseWrapper:
         cursor.execute(sql, (news_id,))
 
         if (cursor.rowcount > 0):
-            row = cursor.fetchone()
-            result.append({
-                'id': row['id'],
-                'timestamp': row['timestamp'],
-                'desc': row['desc'],
-            })
+            result = cursor.fetchone()
 
             cursor.close()
             return result
@@ -147,22 +132,23 @@ class DatabaseWrapper:
             return None
 
     def delete_news(self, news_id):
-        cursor = self.connection.cursor(dictionary=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = "DELETE FROM news WHERE id = %s"
-        cursor.execute(sql, (news_id,))
 
         #check
         sql = "SELECT * FROM news WHERE id = %s"
         cursor.execute(sql, (news_id,))
-
+        
         if (cursor.rowcount > 0):
-            result = False
-        else:
-            result = True
+            sql = "DELETE FROM news WHERE id = %s"
+            cursor.execute(sql, (news_id,))
+            self.connection.close()
+            cursor.close()
 
-        cursor.close()
-        return result
+            return news_id
+        else: 
+            cursor.close()
+            return None
 
     def __del__(self):
         self.connection.close()
@@ -179,7 +165,7 @@ class Database(DependencyProvider):
                 pool_size=5,
                 pool_reset_session=True,
                 host='127.0.0.1',
-                database='simple_cloud_storage',
+                database='department_news_board',
                 user='root',
                 password=''
             )

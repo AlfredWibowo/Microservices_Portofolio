@@ -1,3 +1,5 @@
+import json
+import re
 from nameko.web.handlers import http
 from requests import session
 import requests
@@ -9,7 +11,7 @@ class NewsGatewayService:
     name = "news_gateway"
 
     session_provider = SessionProvider()
-    user_rpc = RpcProxy('user_service')
+    user_rpc = RpcProxy('news_service')
 
     @http('POST', '/user/register/')
     def register(self, request):
@@ -39,15 +41,22 @@ class NewsGatewayService:
             responses['data'] = result
         else:
             responses['status'] = "Error"
-            responses['message'] = "Register Failed"
+            responses['message'] = "Username Already Taken"
 
         return Response(str(responses))
 
     @http('POST', '/user/login/')
     def login(self, request):
+        responses = {
+            'status': None,
+            'message': None,
+            }
+
         cookies = request.cookies
         if cookies:
-            return Response('You Already Login')
+            responses['status'] = "Error"
+            responses['message'] = "You Already Login"
+            return Response(str(responses))
         else:
             data = format(request.get_data(as_text=True))
             elements = data.split("&")
@@ -64,20 +73,20 @@ class NewsGatewayService:
             
             result = self.user_rpc.login(username, password)
 
-            responses = {
-            'status': None,
-            'message': None,
-            }
-
             if result != None:
                 responses['status'] = "Success"
                 responses['message'] = "Login Successful"
                 responses['data'] = result
+                
+                response = Response(str(responses))
+                session_id = self.session_provider.set_session(responses)
+                response.set_cookie('SESS_ID', session_id)
+                
+                return response
             else:
                 responses['status'] = "Error"
-                responses['message'] = "User Not Found"
-
-            return Response(str(responses))
+                responses['message'] = "Wrong Username & Password"
+                return Response(str(responses))
 
     @http('GET', '/user/logout/')
     def logout(self, request):
@@ -91,6 +100,7 @@ class NewsGatewayService:
         if cookies:
             responses['status'] = "Success"
             responses['message'] = "Logout Successful"
+
             response = Response(str(responses))
             response.delete_cookie('SESS_ID')
             
@@ -102,7 +112,7 @@ class NewsGatewayService:
             return Response(str(responses))
 
     @http('GET', '/news/')
-    def get_all_news(self):
+    def get_all_news(self, request):
         result = self.user_rpc.get_all_news()
 
         responses = {
@@ -119,7 +129,7 @@ class NewsGatewayService:
         return Response(str(responses))
 
     @http('GET', '/news/<int:news_id>/')
-    def get_news_by_id(self, news_id):
+    def get_news_by_id(self, request, news_id):
         result = self.user_rpc.get_news_by_id(news_id)
 
         responses = {
@@ -130,8 +140,8 @@ class NewsGatewayService:
             responses['status'] = "Success"
             responses['data'] = result
         else:
-            responses['status'] = "Success"
-            responses['message'] = "News Not Found"
+            responses['status'] = "Error"
+            responses['message'] = "News Not Found / Archived"
         
         return Response(str(responses))
 
@@ -148,14 +158,14 @@ class NewsGatewayService:
             data = format(request.get_data(as_text=True))
             element = requests.utils.unquote(data)
             node = element.split('=')
-            desc = node[1]
+            description = node[1]
 
-            result = self.user_rpc.add_news(desc)
+            result = self.user_rpc.add_news(description)
 
             if result != None:
                 responses['status'] = "Success"
                 responses['message'] = "News Added"
-                responses['data'] = result
+                responses['data'] = json.dumps(result)
             else:
                 responses['status'] = "Error"
                 responses['message'] = "Add News Failed"
@@ -175,7 +185,12 @@ class NewsGatewayService:
         }
 
         if cookies:
-            result = self.user_rpc.edit_news(news_id)
+            data = format(request.get_data(as_text=True))
+            element = requests.utils.unquote(data)
+            node = element.split('=')
+            description = node[1]
+
+            result = self.user_rpc.edit_news(news_id, description)
 
             if result != None:
                 responses['status'] = "Success"
@@ -190,7 +205,7 @@ class NewsGatewayService:
         
         return Response(str(responses))
 
-    @http('DELETE', '/news/delete/<int:news_id>')
+    @http('DELETE', '/news/delete/<int:news_id>/')
     def delete_news(self, request, news_id):
         cookies = request.cookies
 
@@ -205,10 +220,10 @@ class NewsGatewayService:
             if result != None:
                 responses['status'] = "Success"
                 responses['message'] = "News Deleted"
-                responses['data'] = result
+                responses['news_id'] = result
             else:
                 responses['status'] = "Error"
-                responses['message'] = "Delete News Failed"
+                responses['message'] = "News Does Not Exist"
         else:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
