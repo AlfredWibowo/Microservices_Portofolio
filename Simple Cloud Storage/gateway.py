@@ -1,15 +1,14 @@
 from nameko.web.handlers import http
 from requests import session
-import requests
 from werkzeug.wrappers import Response
 from nameko.rpc import RpcProxy
 from Session.redis import SessionProvider
 
-class NewsGatewayService:
-    name = "news_gateway"
+class StorageGatewayService:
+    name = "storage_gateway"
 
     session_provider = SessionProvider()
-    user_rpc = RpcProxy('news_service')
+    user_rpc = RpcProxy('storage_service')
 
     @http('POST', '/user/register/')
     def register(self, request):
@@ -109,121 +108,69 @@ class NewsGatewayService:
 
             return Response(str(responses))
 
-    @http('GET', '/news/')
-    def get_all_news(self, request):
-        result = self.user_rpc.get_all_news()
-
+    @http('POST', '/user/upload/')
+    def upload_file(self, request):
+        cookies = request.cookies
+        
         responses = {
             'status': None,
+            'message': None,
         }
 
-        if result != None:
+        if cookies:
             responses['status'] = "Success"
-            responses['data'] = result
+            responses['message'] = "Logout Successful"
+
+            response = Response(str(responses))
+            
+            return response
         else:
             responses['status'] = "Error"
-            responses['message'] = "News Does Not Exist"
+            responses['message'] = "You Need to Login First"
 
-        return Response(str(responses))
+            return Response(str(responses))
 
-    @http('GET', '/news/<int:news_id>/')
-    def get_news_by_id(self, request, news_id):
-        result = self.user_rpc.get_news_by_id(news_id)
-
+    @http('POST', '/user/download/')
+    def download_file(self, request):
+        cookies = request.cookies
+        
         responses = {
             'status': None,
+            'message': None,
         }
 
-        if result != None:
+        if cookies:
             responses['status'] = "Success"
-            responses['data'] = result
+            responses['message'] = "Logout Successful"
+
+            response = Response(str(responses))
+            
+            return response
         else:
             responses['status'] = "Error"
-            responses['message'] = "News Not Found / Archived"
-        
-        return Response(str(responses))
+            responses['message'] = "You Need to Login First"
 
-    @http('POST', '/news/add/')
-    def add_news(self, request):
+            return Response(str(responses))
+
+    @http('POST', '/user/share/')
+    def share_file(self, request):
         cookies = request.cookies
-
+        
         responses = {
             'status': None,
             'message': None,
         }
 
         if cookies:
-            data = format(request.get_data(as_text=True))
-            element = requests.utils.unquote(data)
-            node = element.split('=')
-            description = node[1]
+            responses['status'] = "Success"
+            responses['message'] = "Logout Successful"
 
-            result = self.user_rpc.add_news(description)
-
-            if result != None:
-                responses['status'] = "Success"
-                responses['message'] = "News Added"
-                responses['data'] = result
-            else:
-                responses['status'] = "Error"
-                responses['message'] = "Add News Failed"
+            response = Response(str(responses))
+            
+            return response
         else:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
-        
-        return Response(str(responses))
 
-    @http('PUT', '/news/edit/<int:news_id>/')
-    def edit_news(self, request, news_id):
-        cookies = request.cookies
+            return Response(str(responses))
 
-        responses = {
-            'status': None,
-            'message': None,
-        }
-
-        if cookies:
-            data = format(request.get_data(as_text=True))
-            element = requests.utils.unquote(data)
-            node = element.split('=')
-            description = node[1]
-
-            result = self.user_rpc.edit_news(news_id, description)
-
-            if result != None:
-                responses['status'] = "Success"
-                responses['message'] = "News Edited"
-                responses['data'] = result
-            else:
-                responses['status'] = "Error"
-                responses['message'] = "Edit News Failed"
-        else:
-            responses['status'] = "Error"
-            responses['message'] = "You Need to Login First"
-        
-        return Response(str(responses))
-
-    @http('DELETE', '/news/delete/<int:news_id>/')
-    def delete_news(self, request, news_id):
-        cookies = request.cookies
-
-        responses = {
-            'status': None,
-            'message': None,
-        }
-
-        if cookies:
-            result = self.user_rpc.delete_news(news_id)
-
-            if result != None:
-                responses['status'] = "Success"
-                responses['message'] = "News Deleted"
-                responses['news_id'] = result
-            else:
-                responses['status'] = "Error"
-                responses['message'] = "News Does Not Exist"
-        else:
-            responses['status'] = "Error"
-            responses['message'] = "You Need to Login First"
-        
-        return Response(str(responses))

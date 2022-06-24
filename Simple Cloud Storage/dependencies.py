@@ -1,4 +1,4 @@
-import json
+from fileinput import close
 from nameko.extensions import DependencyProvider
 
 import mysql.connector
@@ -13,25 +13,59 @@ class DatabaseWrapper:
         self.connection = connection
 
     def register(self, username, password):
-        cursor = self.connection.cursor(dictionary=True,buffered=True)
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
         #check username already used or not
         sql = "SELECT * FROM user WHERE username = %s"
         cursor.execute(sql, (username,))
-
-        if (cursor.rowcount == 0):  
-            sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
-            cursor.execute(sql, (username, password,))
-            sql2 = "SELECT * FROM user WHERE username = %s AND password = %s"
-            cursor.execute(sql2, (username, password,))
-            result = cursor.fetchone()
-            cursor.close()
-            self.connection.commit()
-            return result
-        else:
+        
+        if (cursor.rowcount > 0):
             cursor.close()
             return None
+        else:
+            #insert to db
+            sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
+            cursor.execute(sql, (username, password,))
+            self.connection.commit()
+
+            sql = "SELECT * FROM user WHERE username = %s AND password = %s"
+            cursor.execute(sql, (username, password,))
+
+            result = cursor.fetchone()
+            
+            cursor.close()
+            return result 
+
+    def login(self, username, password):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
+        result = []     
+        #checking username and password exsist 
+        sql = "SELECT * FROM user WHERE username = %s AND password = %s"
+        cursor.execute(sql, (username, password,))
+
+        if (cursor.rowcount > 0):
+            result = cursor.fetchone()
+
+            cursor.close()
+            return result
+        else:
+            return None
+
+    def upload_file(self):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
+        result = []
+        return None
+
+    def download_file(self):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
+        result = []
+        return None
+
+    def share_file(self):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
+        result = []
+        return None
 
     def __del__(self):
         self.connection.close()
@@ -48,7 +82,7 @@ class Database(DependencyProvider):
                 pool_size=5,
                 pool_reset_session=True,
                 host='127.0.0.1',
-                database='department_news_board',
+                database='simple_cloud_storage',
                 user='root',
                 password=''
             )
