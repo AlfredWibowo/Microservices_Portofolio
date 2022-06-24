@@ -1,4 +1,3 @@
-import json
 from nameko.rpc import rpc
 from dependencies import Database
 
