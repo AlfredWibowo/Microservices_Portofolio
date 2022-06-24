@@ -139,7 +139,7 @@ class NewsGatewayService:
             responses['data'] = result
         else:
             responses['status'] = "Error"
-            responses['message'] = "News Not Found / Archived"
+            responses['message'] = "News Not Found"
         
         return Response(str(responses))
 

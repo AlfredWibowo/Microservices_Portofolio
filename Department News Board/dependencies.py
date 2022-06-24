@@ -56,7 +56,7 @@ class DatabaseWrapper:
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
-        #asumsi achive = tidak dapat dilihat lg tp msh ada datanya
+        #asumsi archive = tidak dapat dilihat lg tp msh ada datanya
         sql = "SELECT * FROM news WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
         cursor.execute(sql)
 
@@ -77,8 +77,8 @@ class DatabaseWrapper:
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
-        #asumsi achive = tidak dapat dilihat lg tp msh ada datanya
-        sql = "SELECT * FROM news WHERE id = %s AND timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
+        #asumsi archive news bisa dilihat
+        sql = "SELECT * FROM news WHERE id = %s"
         cursor.execute(sql, (news_id,))
 
         if (cursor.rowcount > 0):
@@ -135,14 +135,14 @@ class DatabaseWrapper:
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
-        #check
+        #check delete
         sql = "SELECT * FROM news WHERE id = %s"
         cursor.execute(sql, (news_id,))
         
         if (cursor.rowcount > 0):
             sql = "DELETE FROM news WHERE id = %s"
             cursor.execute(sql, (news_id,))
-            self.connection.close()
+            self.connection.commit()
             cursor.close()
 
             return news_id
