@@ -81,6 +81,30 @@ Untuk membuat akun agar dapat manage news.
 }
 ```
 
+## Logout
+
+Untuk menghapus session.
+
+### Request
+
+![my badge](https://badgen.net/badge/METHOD/GET/green) /user/logout/
+
+### Response
+
+```json
+{
+   "status": "Success", 
+   "message": "Logout Successful", 
+}
+```
+
+```json
+{
+   "status": "Error", 
+   "message": "You Need to Login First"
+}
+```
+
 # News Service
 
 ## Get All News
