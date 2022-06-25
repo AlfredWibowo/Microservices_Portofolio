@@ -37,12 +37,12 @@ class NewsGatewayService:
         if result != None:
             responses['status'] = "Success"
             responses['message'] = "Register Successful"
-            responses['data'] = result
+            responses['data'] = json.dumps(result)
         else:
             responses['status'] = "Error"
             responses['message'] = "Username Already Taken"
 
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('POST', '/user/login/')
     def login(self, request):
@@ -164,7 +164,7 @@ class NewsGatewayService:
             if result != None:
                 responses['status'] = "Success"
                 responses['message'] = "News Added"
-                responses['data'] = result
+                responses['data'] = json.dumps(result)
             else:
                 responses['status'] = "Error"
                 responses['message'] = "Add News Failed"

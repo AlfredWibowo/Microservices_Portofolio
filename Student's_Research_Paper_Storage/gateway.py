@@ -1,3 +1,4 @@
+import json
 from nameko.web.handlers import http
 from requests import session
 from werkzeug.wrappers import Response
@@ -15,23 +16,17 @@ class StorageGatewayService:
         data = format(request.get_data(as_text=True))
         elements = data.split("&")
 
-        email = ""
-        password = ""
-        nrp = ""
         username = ""
+        password = ""
 
         for element in elements:
             node = element.split("=")
-            if (node[0] == "email"):
-                email = node[1]
+            if (node[0] == "username"):
+                username = node[1]
             elif (node[0] == "password"):
                 password = node[1]
-            elif (node[0] == "nrp"):
-                nrp = node[1]
-            elif (node[0] == "username"):
-                username = node[1]
         
-        result = self.user_rpc.register(email, password, nrp, username)
+        result = self.user_rpc.register(username, password)
 
         responses = {
             'status': None,
@@ -41,12 +36,12 @@ class StorageGatewayService:
         if result != None:
             responses['status'] = "Success"
             responses['message'] = "Register Successful"
-            responses['data'] = result
+            responses['data'] = json.dumps(result)
         else:
             responses['status'] = "Error"
-            responses['message'] = "Email Already Taken"
+            responses['message'] = "Username Already Taken"
 
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('POST', '/user/login/')
     def login(self, request):
@@ -59,37 +54,37 @@ class StorageGatewayService:
         if cookies:
             responses['status'] = "Error"
             responses['message'] = "You Already Login"
-            return Response(str(responses))
+            return Response(json.dumps(responses))
         else:
             data = format(request.get_data(as_text=True))
             elements = data.split("&")
 
-            email = ""
+            username = ""
             password = ""
 
             for element in elements:
                 node = element.split('=')
-                if (node[0] == "email"):
-                    email = node[1]
+                if (node[0] == "username"):
+                    username = node[1]
                 elif (node[0] == "password"):
-                    password = node[1]
+                    password = node[1] 
             
-            result = self.user_rpc.login(email, password)
+            result = self.user_rpc.login(username, password)
 
             if result != None:
                 responses['status'] = "Success"
                 responses['message'] = "Login Successful"
                 responses['data'] = result
                 
-                response = Response(str(responses))
+                response = Response(json.dumps(responses))
                 session_id = self.session_provider.set_session(responses)
                 response.set_cookie('SESS_ID', session_id)
                 
                 return response
             else:
                 responses['status'] = "Error"
-                responses['message'] = "Wrong Email & Password"
-                return Response(str(responses))
+                responses['message'] = "Wrong Username & Password"
+                return Response(json.dumps(responses))
 
     @http('GET', '/user/logout/')
     def logout(self, request):
@@ -104,7 +99,7 @@ class StorageGatewayService:
             responses['status'] = "Success"
             responses['message'] = "Logout Successful"
 
-            response = Response(str(responses))
+            response = Response(json.dumps(responses))
             response.delete_cookie('SESS_ID')
             
             return response
@@ -112,7 +107,7 @@ class StorageGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
 
-            return Response(str(responses))
+            return Response(json.dumps(responses))
 
     @http('POST', '/user/upload/')
     def upload_file(self, request):

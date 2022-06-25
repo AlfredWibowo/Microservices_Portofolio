@@ -1,14 +1,15 @@
+import json
 from nameko.web.handlers import http
 from requests import session
 from werkzeug.wrappers import Response
 from nameko.rpc import RpcProxy
 from Session.redis import SessionProvider
 
-class StorageGatewayService:
-    name = "storage_gateway"
+class UserGatewayService:
+    name = "user_gateway"
 
     session_provider = SessionProvider()
-    user_rpc = RpcProxy('storage_service')
+    user_rpc = RpcProxy('user_service')
 
     @http('POST', '/user/register/')
     def register(self, request):
@@ -35,12 +36,12 @@ class StorageGatewayService:
         if result != None:
             responses['status'] = "Success"
             responses['message'] = "Register Successful"
-            responses['data'] = result
+            responses['data'] = json.dumps(result)
         else:
             responses['status'] = "Error"
             responses['message'] = "Username Already Taken"
 
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('POST', '/user/login/')
     def login(self, request):
@@ -53,7 +54,7 @@ class StorageGatewayService:
         if cookies:
             responses['status'] = "Error"
             responses['message'] = "You Already Login"
-            return Response(str(responses))
+            return Response(json.dumps(responses))
         else:
             data = format(request.get_data(as_text=True))
             elements = data.split("&")
@@ -75,7 +76,7 @@ class StorageGatewayService:
                 responses['message'] = "Login Successful"
                 responses['data'] = result
                 
-                response = Response(str(responses))
+                response = Response(json.dumps(responses))
                 session_id = self.session_provider.set_session(responses)
                 response.set_cookie('SESS_ID', session_id)
                 
@@ -83,7 +84,7 @@ class StorageGatewayService:
             else:
                 responses['status'] = "Error"
                 responses['message'] = "Wrong Username & Password"
-                return Response(str(responses))
+                return Response(json.dumps(responses))
 
     @http('GET', '/user/logout/')
     def logout(self, request):
@@ -98,7 +99,7 @@ class StorageGatewayService:
             responses['status'] = "Success"
             responses['message'] = "Logout Successful"
 
-            response = Response(str(responses))
+            response = Response(json.dumps(responses))
             response.delete_cookie('SESS_ID')
             
             return response
@@ -106,71 +107,17 @@ class StorageGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
 
-            return Response(str(responses))
+            return Response(json.dumps(responses))
 
-    @http('POST', '/user/upload/')
-    def upload_file(self, request):
+    @http('GET', '/user/cookie_username/')
+    def logout(self, request):
         cookies = request.cookies
         
         responses = {
-            'status': None,
-            'message': None,
+            'username': None,
         }
 
         if cookies:
-            responses['status'] = "Success"
-            responses['message'] = "Logout Successful"
+            responses['username'] = cookies['USERNAME']
 
-            response = Response(str(responses))
-            
-            return response
-        else:
-            responses['status'] = "Error"
-            responses['message'] = "You Need to Login First"
-
-            return Response(str(responses))
-
-    @http('POST', '/user/download/')
-    def download_file(self, request):
-        cookies = request.cookies
-        
-        responses = {
-            'status': None,
-            'message': None,
-        }
-
-        if cookies:
-            responses['status'] = "Success"
-            responses['message'] = "Logout Successful"
-
-            response = Response(str(responses))
-            
-            return response
-        else:
-            responses['status'] = "Error"
-            responses['message'] = "You Need to Login First"
-
-            return Response(str(responses))
-
-    @http('POST', '/user/share/')
-    def share_file(self, request):
-        cookies = request.cookies
-        
-        responses = {
-            'status': None,
-            'message': None,
-        }
-
-        if cookies:
-            responses['status'] = "Success"
-            responses['message'] = "Logout Successful"
-
-            response = Response(str(responses))
-            
-            return response
-        else:
-            responses['status'] = "Error"
-            responses['message'] = "You Need to Login First"
-
-            return Response(str(responses))
-
+        return Response(str(responses))
