@@ -102,7 +102,7 @@ class DatabaseWrapper:
                 return None
 
 
-    def share_file(self, share_to, file_name):
+    def share_file(self, owner, share_to, file_name):
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
         #check already shared or not
@@ -114,18 +114,37 @@ class DatabaseWrapper:
             cursor.close()
             return None
         else:
-            sql = "INSERT INTO shared (receiver, file_name) VALUES (%s, %s)"
-            cursor.execute(sql, (share_to, file_name))
-            self.connection.commit()
+            #check user is exsist
+            sql = "SELECT * FROM user WHERE username = %s"
+            cursor.execute(sql, (share_to,))
 
-            #check share
-            sql = "SELECT * FROM shared WHERE receiver = %s AND file_name = %s"
-            cursor.execute(sql, (receiver, file_name,))
+            if (cursor.rowcount > 0):
+                #check have access to share
+                sql = "SELECT * FROM storage WHERE owner = %s AND file_name = %s"
+                cursor.execute(sql, (owner, file_name,))
 
-            result = cursor.fetchone()
+                if (cursor.rowcount > 0):
+                    #have access
+                    sql = "INSERT INTO shared (receiver, file_name) VALUES (%s, %s)"
+                    cursor.execute(sql, (share_to, file_name))
+                    self.connection.commit()
 
-            cursor.close()
-            return result
+                    #check share
+                    sql = "SELECT * FROM shared WHERE receiver = %s AND file_name = %s"
+                    cursor.execute(sql, (receiver, file_name,))
+
+                    result = cursor.fetchone()
+
+                    cursor.close()
+                    return result
+                else:
+                    #no have access
+                    return 1
+            else:
+                #user does not exist
+                cursor.close()
+                return 0
+
 
     def __del__(self):
         self.connection.close()

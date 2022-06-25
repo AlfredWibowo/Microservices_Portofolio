@@ -16,5 +16,5 @@ class StorageService:
         return self.database.download_file(downloader, file_name)
     
     @rpc
-    def share_file(self, share_to, file_name):
-        return self.database.share_file(share_to, file_name)
+    def share_file(self, owner, share_to, file_name):
+        return self.database.share_file(owner, share_to, file_name)
