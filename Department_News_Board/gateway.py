@@ -123,7 +123,7 @@ class NewsGatewayService:
             responses['data'] = result
         else:
             responses['status'] = "Error"
-            responses['message'] = "News Does Not Exist"
+            responses['message'] = "News Does Not Exist / Archived"
 
         return Response(json.dumps(responses))
 
@@ -140,7 +140,7 @@ class NewsGatewayService:
             responses['data'] = result
         else:
             responses['status'] = "Error"
-            responses['message'] = "News Not Found"
+            responses['message'] = "News Does Not Exist"
         
         return Response(json.dumps(responses))
 
@@ -197,7 +197,7 @@ class NewsGatewayService:
                 responses['data'] = result
             else:
                 responses['status'] = "Error"
-                responses['message'] = "Edit News Failed"
+                responses['message'] = "News Does Not Exist"
         else:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"

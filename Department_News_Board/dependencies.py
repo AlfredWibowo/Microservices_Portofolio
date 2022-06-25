@@ -106,36 +106,36 @@ class DatabaseWrapper:
             cursor.close()
             return result
         else:
-            return False
+            return None
 
     def edit_news(self, news_id, description):
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
-        sql = """
-            UPDATE news
-            SET timestamp = CURRENT_DATE, description = %s
-            WHERE id = %s
-        """
-        cursor.execute(sql, (description, news_id))
-        self.connection.commit()
-        
-        #check edit
+
+        #check available news
         sql = "SELECT * FROM news WHERE id = %s"
         cursor.execute(sql, (news_id,))
 
         if (cursor.rowcount > 0):
-            result = cursor.fetchone()
-
+            sql = """
+                UPDATE news
+                SET timestamp = CURRENT_DATE, description = %s
+                WHERE id = %s
+            """
+            cursor.execute(sql, (description, news_id))
+            self.connection.commit()
             cursor.close()
+
             return result
         else:
+            cursor.close()
             return None
 
     def delete_news(self, news_id):
         cursor = self.connection.cursor(dictionary=True, buffered=True)
         result = []
 
-        #check delete
+        #check available news
         sql = "SELECT * FROM news WHERE id = %s"
         cursor.execute(sql, (news_id,))
         
