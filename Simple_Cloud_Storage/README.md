@@ -94,7 +94,7 @@ Untuk menghapus session.
 ```json
 {
    "status": "Success", 
-   "message": "Register Successful", 
+   "message": "Logout Successful", 
 }
 ```
 
