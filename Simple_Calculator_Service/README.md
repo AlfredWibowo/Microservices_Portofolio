@@ -9,110 +9,6 @@ This calculator application is used to display numbers (prime/palindrome/prime&p
 
 ## Installation
 
-### Celery
-
-Use the package manager pip to install celery.
-
-```bash
-pip install celery
-```
-
-Usage:
-
-- Create ```celery.py``` in the project folder where the ```settings.py``` file exists:
-
-```python
-import os
-from celery import Celery
-
-# setting the Django settings module.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'celery_task.settings')
-app = Celery('celery_task')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# Looks up for task modules in Django applications and loads them
-app.autodiscover_tasks()
-```
-
-- Add this code in the ```__init__.py``` file within the package where ```settings.py``` file is located:
-
-```python
-from .celery import app as celery_app
-
-__all__ = ['celery_app']
-```
-
-- Create celery task at root folder with:
-
-```bash
-python manage.py startapp task
-```
-
-- Create ```task.py`` in task folder
-
-```python
-from celery import shared_task
-
-def is_prime(num):
-    factor = 0
-    for i in range(1, num + 1):
-        if num % i == 0:
-            factor += 1
-
-    return factor == 2
-
-def is_palindrome(num):
-    original = num
-    reverse = 0
-    tmp = int(num)
-
-    while tmp != 0:
-        left = tmp % 10
-        reverse = reverse * 10 + left
-        tmp = int(tmp / 10)
-
-    return original == reverse
-
-@shared_task
-def prime_task(index):
-    result = []
-    n = 0
-    counter = 0
-    while n != index + 1:
-        if is_prime(counter):
-            result.append(counter)
-            n += 1
-        counter += 1
-
-    return result[index]
-
-@shared_task
-def palindrome_task(index):
-    result = []
-    n = 0
-    counter = 0
-    while n != index + 1:
-        if is_palindrome(counter):
-            result.append(counter)
-            n += 1
-        counter += 1
-
-    return result[index]
-
-@shared_task
-def prime_palindrome_task(index):
-    result = []
-    n = 0
-    counter = 0
-    while n != index + 1:
-        if is_prime(counter) and is_palindrome(counter):
-            result.append(counter)
-            n += 1
-        counter += 1
-
-    return result[index]
-```
-
 ### Django
 
 Use the package manager pip to install django.
@@ -183,11 +79,115 @@ urlpatterns = [
 ]
 ```
 
-- For testing run in browser ```localhost:8000``
+- For testing run in browser ```localhost:8000```
 
-# Calculation Service
+### Celery
 
-![my badge](https://badgen.net/badge/METHOD/GET/yellow) /```(prime/palindrome/prime_palindrome)```/```<int:index>```/
+Use the package manager pip to install celery.
+
+```bash
+pip install celery
+```
+
+Usage:
+
+- Create ```celery.py``` in the project folder where the ```settings.py``` file exists:
+
+```python
+import os
+from celery import Celery
+
+# setting the Django settings module.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'celery_task.settings')
+app = Celery('celery_task')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Looks up for task modules in Django applications and loads them
+app.autodiscover_tasks()
+```
+
+- Add this code in the ```__init__.py``` file within the package where ```settings.py``` file is located:
+
+```python
+from .celery import app as celery_app
+
+__all__ = ['celery_app']
+```
+
+- Create celery task at root folder with:
+
+```bash
+python manage.py startapp task
+```
+
+- Create ```task.py``` in task folder
+
+```python
+from celery import shared_task
+
+def is_prime(num):
+    factor = 0
+    for i in range(1, num + 1):
+        if num % i == 0:
+            factor += 1
+
+    return factor == 2
+
+def is_palindrome(num):
+    original = num
+    reverse = 0
+    tmp = int(num)
+
+    while tmp != 0:
+        left = tmp % 10
+        reverse = reverse * 10 + left
+        tmp = int(tmp / 10)
+
+    return original == reverse
+
+@shared_task
+def prime_task(index):
+    result = []
+    n = 0
+    counter = 0
+    while n != index + 1:
+        if is_prime(counter):
+            result.append(counter)
+            n += 1
+        counter += 1
+
+    return result[index]
+
+@shared_task
+def palindrome_task(index):
+    result = []
+    n = 0
+    counter = 0
+    while n != index + 1:
+        if is_palindrome(counter):
+            result.append(counter)
+            n += 1
+        counter += 1
+
+    return result[index]
+
+@shared_task
+def prime_palindrome_task(index):
+    result = []
+    n = 0
+    counter = 0
+    while n != index + 1:
+        if is_prime(counter) and is_palindrome(counter):
+            result.append(counter)
+            n += 1
+        counter += 1
+
+    return result[index]
+```
+
+# Calculator Service
+
+![my badge](https://badgen.net/badge/METHOD/GET/yellow) /prime/```<int:index>```/
 
 ```json
 {
@@ -195,4 +195,19 @@ urlpatterns = [
 }
 ```
 
+![my badge](https://badgen.net/badge/METHOD/GET/yellow) /palindrome/```<int:index>```/
+
+```json
+{
+   "result": <int>
+}
+```
+
+![my badge](https://badgen.net/badge/METHOD/GET/yellow) /prime_palindrome/```<int:index>```/
+
+```json
+{
+   "result": <int>
+}
+```
 
