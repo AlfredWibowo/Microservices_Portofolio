@@ -1,3 +1,4 @@
+import json
 from nameko.web.handlers import http
 from requests import session
 import requests
@@ -54,7 +55,7 @@ class NewsGatewayService:
         if cookies:
             responses['status'] = "Error"
             responses['message'] = "You Already Login"
-            return Response(str(responses))
+            return Response(json.dumps(responses))
         else:
             data = format(request.get_data(as_text=True))
             elements = data.split("&")
@@ -76,7 +77,7 @@ class NewsGatewayService:
                 responses['message'] = "Login Successful"
                 responses['data'] = result
                 
-                response = Response(str(responses))
+                response = Response(json.dumps(responses))
                 session_id = self.session_provider.set_session(responses)
                 response.set_cookie('SESS_ID', session_id)
                 
@@ -84,7 +85,7 @@ class NewsGatewayService:
             else:
                 responses['status'] = "Error"
                 responses['message'] = "Wrong Username & Password"
-                return Response(str(responses))
+                return Response(json.dumps(responses))
 
     @http('GET', '/user/logout/')
     def logout(self, request):
@@ -99,7 +100,7 @@ class NewsGatewayService:
             responses['status'] = "Success"
             responses['message'] = "Logout Successful"
 
-            response = Response(str(responses))
+            response = Response(json.dumps(responses))
             response.delete_cookie('SESS_ID')
             
             return response
@@ -107,7 +108,7 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
 
-            return Response(str(responses))
+            return Response(json.dumps(responses))
 
     @http('GET', '/news/')
     def get_all_news(self, request):
@@ -124,7 +125,7 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "News Does Not Exist"
 
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('GET', '/news/<int:news_id>/')
     def get_news_by_id(self, request, news_id):
@@ -141,7 +142,7 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "News Not Found"
         
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('POST', '/news/add/')
     def add_news(self, request):
@@ -171,7 +172,7 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
         
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('PUT', '/news/edit/<int:news_id>/')
     def edit_news(self, request, news_id):
@@ -201,7 +202,7 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
         
-        return Response(str(responses))
+        return Response(json.dumps(responses))
 
     @http('DELETE', '/news/delete/<int:news_id>/')
     def delete_news(self, request, news_id):
@@ -226,4 +227,4 @@ class NewsGatewayService:
             responses['status'] = "Error"
             responses['message'] = "You Need to Login First"
         
-        return Response(str(responses))
+        return Response(json.dumps(responses))
