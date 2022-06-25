@@ -161,7 +161,7 @@ urlpatterns = [
 
 # Calculator Service
 
-![my badge](https://badgen.net/badge/METHOD/GET/yellow) /prime/```<int:index>```/
+![my badge](https://badgen.net/badge/METHOD/GET/green) /prime/```<int:index>```/
 
 ```json
 {
@@ -169,7 +169,7 @@ urlpatterns = [
 }
 ```
 
-![my badge](https://badgen.net/badge/METHOD/GET/yellow) /palindrome/```<int:index>```/
+![my badge](https://badgen.net/badge/METHOD/GET/green) /palindrome/```<int:index>```/
 
 ```json
 {
@@ -177,7 +177,7 @@ urlpatterns = [
 }
 ```
 
-![my badge](https://badgen.net/badge/METHOD/GET/yellow) /prime_palindrome/```<int:index>```/
+![my badge](https://badgen.net/badge/METHOD/GET/green) /prime_palindrome/```<int:index>```/
 
 ```json
 {
