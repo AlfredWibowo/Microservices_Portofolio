@@ -19,6 +19,37 @@ pip install celery
 
 Usage:
 
+- Create ```celery.py``` in the project folder where the ```settings.py``` file exists:
+
+```python
+import os
+from celery import Celery
+
+# setting the Django settings module.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'celery_task.settings')
+app = Celery('celery_task')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Looks up for task modules in Django applications and loads them
+app.autodiscover_tasks()
+```
+
+- Add this code in the ```__init__.py``` file within the package where ```settings.py``` file is located:
+
+```python
+from .celery import app as celery_app
+
+__all__ = ['celery_app']
+```
+
+- Create celery task at root folder with:
+
+```bash
+python manage.py startapp task
+```
+
+- Create ```task.py`` in task folder
+
 ```python
 from celery import shared_task
 
@@ -105,12 +136,15 @@ cd <project_name>
 manage.py runserver
 ```
 
-- Create response service
+- Create response of result in ```views.py```
 
 ```python
+from django.shortcuts import render
 import json
 from django.http import HttpResponse
-from dependencies import prime_task, palindrome_task, prime_palindrome_task
+from task.task import prime_task, palindrome_task, prime_palindrome_task
+
+# Create your views here.
 
 def create_response(result):
     response_data = {
@@ -119,22 +153,22 @@ def create_response(result):
     return json.dumps(response_data)
 
 def prime(request, index):
-    result = prime_task(index)
+    result = prime_task.delay(index)
     response = create_response(result)
     return HttpResponse(response, content_type="application/json")
 
 def palindrome(request, index):
-    result = palindrome_task(index)
+    result = palindrome_task.delay(index)
     response = create_response(result,)
     return HttpResponse(response, content_type="application/json")
 
 def prime_palindrome(request, index):
-    result = palindrome_task(index)
+    result = prime_palindrome_task.delay(index)
     response = create_response(result)
     return HttpResponse(response, content_type="application/json")
 ```
 
-- Create url path
+- Create response in ```views.py```
 
 ```python
 from django.urls import path
@@ -148,6 +182,8 @@ urlpatterns = [
     path('prime_palindrome/<int:index>/', prime_palindrome),
 ]
 ```
+
+- For testing run in browser ```localhost:8000``
 
 # Calculation Service
 
