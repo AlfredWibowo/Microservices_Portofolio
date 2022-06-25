@@ -170,8 +170,8 @@ class StorageGatewayService:
 
         return Response(json.dumps(responses))
             
-    @http('POST', '/storage/download/')
-    def download_file(self, request):
+    @http('GET', '/storage/download/<string:file_name>/')
+    def download_file(self, request, file_name):
         cookies = request.cookies
         
         responses = {
@@ -181,12 +181,6 @@ class StorageGatewayService:
 
         if cookies:
             username = cookies['USERNAME']
-            file_name = ""
-            
-            data = format(request.get_data(as_text=True))
-            element = requests.utils.unquote(data)
-            node = element.split('=')
-            file_name = node[1]
 
             result = self.storage_rpc.download_file(username, file_name)
 
