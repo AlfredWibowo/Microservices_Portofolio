@@ -173,7 +173,7 @@ File
 }
 ```
 
-## Download File
+## Share File
 
 Merupakan sebuah fungsi yang digunakan untuk menshare file yang terdapat pada service agar file dapat didownload orang lain. Session digunakan untuk melakukan pengecekan apakah file tersebut dimiliki oleh user yang mengakses. (Login Required)
 
