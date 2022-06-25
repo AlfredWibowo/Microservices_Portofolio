@@ -1,6 +1,6 @@
 import json
 from django.http import HttpResponse
-from dependencies import prime_task, palindrome_task, prime_palindrome_task
+from task import prime_task, palindrome_task, prime_palindrome_task
 
 def create_response(result):
     response_data = {
