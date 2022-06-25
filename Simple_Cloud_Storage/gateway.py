@@ -81,6 +81,7 @@ class StorageGatewayService:
                 
                 response = Response(json.dumps(responses))
                 session_id = self.session_provider.set_session(responses)
+                response.set_cookie('USERNAME', username)
                 response.set_cookie('SESS_ID', session_id)
                 
                 return response
@@ -103,6 +104,7 @@ class StorageGatewayService:
             responses['message'] = "Logout Successful"
 
             response = Response(json.dumps(responses))
+            response.delete_cookie('USERNAME')
             response.delete_cookie('SESS_ID')
             
             return response
