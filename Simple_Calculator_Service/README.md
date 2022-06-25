@@ -25,7 +25,7 @@ Use the package manager pip to install django.
 pip install django
 ```
 
-### Usage:
+## Usage
 
 - Starting django project
 
