@@ -6,6 +6,8 @@ Application used to provide announcements on mobile applications / websites.
 
 ## Login
 
+Untuk masuk kedalam system dan membuat Session.
+
 ### Request
 
 ![my badge](https://badgen.net/badge/METHOD/POST/yellow) /user/login/
@@ -46,6 +48,8 @@ Application used to provide announcements on mobile applications / websites.
 
 ## Register
 
+Untuk membuat akun agar dapat manage news.
+
 ### Request
 
 ![my badge](https://badgen.net/badge/METHOD/POST/yellow) /user/register/
@@ -81,6 +85,8 @@ Application used to provide announcements on mobile applications / websites.
 
 ## Get All News
 
+Untuk mendapatkan semua News terbaru (30 hari terakhir) dalam bentuk list of news. (Tidak perlu login)
+
 ### Request
 
 ![my badge](https://badgen.net/badge/METHOD/GET/green) /news/
@@ -114,6 +120,8 @@ Application used to provide announcements on mobile applications / websites.
 
 ## Get News by Id
 
+Mendapatkan sebuah news berdasarkan ID yang diberikan. (Tidak perlu login)
+
 ### Request
 
 ![my badge](https://badgen.net/badge/METHOD/GET/green) /news/```<int:id>```/
@@ -139,6 +147,8 @@ Application used to provide announcements on mobile applications / websites.
 ```
 
 ## Add News
+
+Menambahkan news baru. (Perlu login)
 
 ### Request
 
@@ -178,6 +188,8 @@ Application used to provide announcements on mobile applications / websites.
 ```
 
 ## Edit News
+
+Mengupdate news berdasarkan id. (Perlu login)
 
 ### Request
 
@@ -219,6 +231,8 @@ Application used to provide announcements on mobile applications / websites.
 ```
 
 ## Delete News
+
+Mendelete news berdasarkan id. (Perlu login)
 
 ### Request
 
