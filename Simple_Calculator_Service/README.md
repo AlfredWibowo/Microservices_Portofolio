@@ -9,6 +9,14 @@ This calculator application is used to display numbers (prime/palindrome/prime&p
 
 ## Installation
 
+### Celery
+
+Use the package manager pip to install celery.
+
+```bash
+pip install celery
+```
+
 ### Django
 
 Use the package manager pip to install django.
@@ -17,7 +25,7 @@ Use the package manager pip to install django.
 pip install django
 ```
 
-Usage:
+### Usage:
 
 - Starting django project
 
@@ -31,65 +39,6 @@ django-admin startproject <project_name>
 cd <project_name>
 manage.py runserver
 ```
-
-- Create response of result in ```views.py```
-
-```python
-from django.shortcuts import render
-import json
-from django.http import HttpResponse
-from task.task import prime_task, palindrome_task, prime_palindrome_task
-
-# Create your views here.
-
-def create_response(result):
-    response_data = {
-        'result': result
-    }
-    return json.dumps(response_data)
-
-def prime(request, index):
-    result = prime_task.delay(index)
-    response = create_response(result)
-    return HttpResponse(response, content_type="application/json")
-
-def palindrome(request, index):
-    result = palindrome_task.delay(index)
-    response = create_response(result,)
-    return HttpResponse(response, content_type="application/json")
-
-def prime_palindrome(request, index):
-    result = prime_palindrome_task.delay(index)
-    response = create_response(result)
-    return HttpResponse(response, content_type="application/json")
-```
-
-- Create response in ```views.py```
-
-```python
-from django.urls import path
-from service import prime, palindrome, prime_palindrome
-
-urlpatterns = [
-    #path('admin/', admin.site.urls),
-
-    path('prime/<int:index>/', prime),
-    path('palindrome/<int:index>/', palindrome),
-    path('prime_palindrome/<int:index>/', prime_palindrome),
-]
-```
-
-- For testing run in browser ```localhost:8000```
-
-### Celery
-
-Use the package manager pip to install celery.
-
-```bash
-pip install celery
-```
-
-Usage:
 
 - Create ```celery.py``` in the project folder where the ```settings.py``` file exists:
 
@@ -184,6 +133,56 @@ def prime_palindrome_task(index):
 
     return result[index]
 ```
+
+- Create response of result in ```views.py```
+
+```python
+from django.shortcuts import render
+import json
+from django.http import HttpResponse
+from task.task import prime_task, palindrome_task, prime_palindrome_task
+
+# Create your views here.
+
+def create_response(result):
+    response_data = {
+        'result': result
+    }
+    return json.dumps(response_data)
+
+def prime(request, index):
+    result = prime_task.delay(index)
+    response = create_response(result)
+    return HttpResponse(response, content_type="application/json")
+
+def palindrome(request, index):
+    result = palindrome_task.delay(index)
+    response = create_response(result,)
+    return HttpResponse(response, content_type="application/json")
+
+def prime_palindrome(request, index):
+    result = prime_palindrome_task.delay(index)
+    response = create_response(result)
+    return HttpResponse(response, content_type="application/json")
+```
+
+- Create response in ```views.py```
+
+```python
+from django.urls import path
+from service import prime, palindrome, prime_palindrome
+
+urlpatterns = [
+    #path('admin/', admin.site.urls),
+
+    path('prime/<int:index>/', prime),
+    path('palindrome/<int:index>/', palindrome),
+    path('prime_palindrome/<int:index>/', prime_palindrome),
+]
+```
+
+- For testing, open ```localhost:8000``` in browser
+
 
 # Calculator Service
 
