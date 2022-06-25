@@ -83,7 +83,7 @@ Application used to provide announcements on mobile applications / websites.
 
 ### Request
 
-![my badge](https://badgen.net/badge/METHOD/POST/yellow) /news/
+![my badge](https://badgen.net/badge/METHOD/GET/green) /news/
 
 ### Response
 
@@ -116,7 +116,7 @@ Application used to provide announcements on mobile applications / websites.
 
 ### Request
 
-![my badge](https://badgen.net/badge/METHOD/POST/yellow) /news/```<int:id>```/
+![my badge](https://badgen.net/badge/METHOD/GET/green) /news/```<int:id>```/
 
 ### Response
 
@@ -157,7 +157,8 @@ Application used to provide announcements on mobile applications / websites.
    "status": "Success", 
    "message": "News Added", 
    "data": {
-      "id": 4, "timestamp": "2022-06-25T00:00:00", "description": "news pertama oleh user1"
+      "id": 4, "timestamp": "2022-06-25T00:00:00", 
+      "description": "news pertama oleh user1"
    }
 }
 ```
@@ -180,7 +181,7 @@ Application used to provide announcements on mobile applications / websites.
 
 ### Request
 
-![my badge](https://badgen.net/badge/METHOD/POST/yellow) /news/edit/```<int:id>```
+![my badge](https://badgen.net/badge/METHOD/PUT/blue) /news/edit/```<int:id>```
 
 ```json
 {
@@ -221,7 +222,7 @@ Application used to provide announcements on mobile applications / websites.
 
 ### Request
 
-![my badge](https://badgen.net/badge/METHOD/POST/yellow) /news/edit/```<int:id>```
+![my badge](https://badgen.net/badge/METHOD/DELETE/red) /news/delete/```<int:id>```
 
 ### Response
 
